@@ -15,9 +15,11 @@ class Saxaphone::ElementTest < MiniTest::Spec
     element_attributes %w(foo bar)
     element_attribute 'faz', as: 'baz'
 
-    has_element 'omg', 'TestChildElement' do |element|
+    has_element 'omg', 'Saxaphone::ElementTest::TestChildElement' do |element|
       self.child_special = element.special
     end
+
+    has_element 'wtf', 'Saxaphone::ElementTest::TestChildElement'
   end
 
   def test_setup
@@ -41,12 +43,23 @@ class Saxaphone::ElementTest < MiniTest::Spec
     assert_equal({'baz' => 'value'}, element.attributes)
   end
 
-  def test_has_element
+  def test_has_element_with_block
     element = TestElement.new
-    child_element = TestChildElement.new('omg')
+    child_element = element.new_element('omg')
+    
+    assert_kind_of TestChildElement, child_element
     child_element.special = 'weee'
     element.add_element(child_element)
 
     assert_equal 'weee', element.child_special
+  end
+  
+  def test_has_element_without_block
+    element = TestElement.new
+    child_element = element.new_element('omg')
+    
+    assert_kind_of TestChildElement, child_element
+    element.add_element(child_element)
+    # silence?
   end
 end
