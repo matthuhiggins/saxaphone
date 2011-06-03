@@ -5,30 +5,22 @@ class Saxaphone::ElementTest < MiniTest::Spec
     attr_accessor :special
   end
 
-  class TestElement < Saxaphone::Element
-    attr_accessor :setup_attr
-    attr_accessor :child_special
-    setup do
-      self.setup_attr = 'hola'
-    end
-
-    element_attributes %w(foo bar)
-    element_attribute 'faz', as: 'baz'
-
-    has_element 'omg', 'Saxaphone::ElementTest::TestChildElement' do |element|
-      self.child_special = element.special
-    end
-
-    has_element 'wtf', 'Saxaphone::ElementTest::TestChildElement'
-  end
-
   def test_setup
-    element = TestElement.new
+    element = define_element do
+      attr_accessor :setup_attr
+      setup do
+        self.setup_attr = 'hola'
+      end
+    end
+
     assert_equal 'hola', element.setup_attr
   end
 
   def test_element_attributes
-    element = TestElement.new
+    element = define_element do
+      element_attributes %w(foo bar)
+    end
+
     element.add_element(Saxaphone::Element.new('foo', 'value1'))
     element.add_element(Saxaphone::Element.new('bar', 'value2'))
     element.add_element(Saxaphone::Element.new('invalid', 'value3'))
@@ -37,14 +29,24 @@ class Saxaphone::ElementTest < MiniTest::Spec
   end
 
   def test_element_attribute
-    element = TestElement.new
+    element = define_element do
+      element_attribute 'faz', as: 'baz'
+    end
+
     element.add_element(Saxaphone::Element.new('faz', 'value'))
 
     assert_equal({'baz' => 'value'}, element.attributes)
   end
 
   def test_has_element_with_block
-    element = TestElement.new
+    element = define_element do
+      attr_accessor :child_special
+
+      has_element 'omg', 'Saxaphone::ElementTest::TestChildElement' do |element|
+        self.child_special = element.special
+      end
+    end
+
     child_element = element.new_element('omg')
     
     assert_kind_of TestChildElement, child_element
@@ -55,11 +57,19 @@ class Saxaphone::ElementTest < MiniTest::Spec
   end
   
   def test_has_element_without_block
-    element = TestElement.new
-    child_element = element.new_element('omg')
+    element = define_element do
+      has_element 'wtf', 'Saxaphone::ElementTest::TestChildElement'
+    end
+
+    child_element = element.new_element('wtf')
     
     assert_kind_of TestChildElement, child_element
     element.add_element(child_element)
     # silence?
   end
+  
+  private
+    def define_element(&block)
+      Class.new(Saxaphone::Element, &block).new
+    end
 end
