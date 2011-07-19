@@ -1,3 +1,5 @@
+require 'set'
+
 module Saxaphone
   class Element
     @@base_class_name = 'Saxaphone::Element'
@@ -28,8 +30,16 @@ module Saxaphone
         element_handlers[element_name] = ElementHandler.new(class_name, block)
       end
 
+      def store_attributes(*attribute_names)
+        @stored_attributes = attribute_names.flatten.to_set
+      end
+
       def element_handlers
         @element_handlers ||= {}
+      end
+
+      def stored_attributes
+        @stored_attributes ||= Set.new
       end
 
       def parse(xml)
@@ -41,7 +51,7 @@ module Saxaphone
     def initialize(name = '', content = '', attribute_array = [])
       self.name = name
       self.content = content
-      self.attributes = Hash[attribute_array]
+      self.attributes = Hash[attribute_array.select { |(key, value)| self.class.stored_attributes.include?(key) }]
       setup
     end
 
