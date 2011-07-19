@@ -54,13 +54,13 @@ module Saxaphone
       end
     end
 
-    def new_element(element_name)
+    def element_for(element_name)
       if element_handler = self.class.element_handlers[element_name]
-        klass = Saxaphone::Util.constantize(element_handler.class_name)
+        Saxaphone::Util.constantize(element_handler.class_name)
       else
-        klass = Saxaphone::Element
+        Saxaphone::Element
       end
-      klass.new(element_name)
+      
     end
 
     def append_content(string)

@@ -18,7 +18,8 @@ module Saxaphone
     end
 
     def start_element(name, attributes = [])
-      new_element = element_stack.empty? ? root_element_class.new(name, attributes) : element_stack.last.new_element(name, attributes)
+      element_class = element_stack.empty? ? root_element_class : element_stack.last.element_for(name)
+      new_element = element_class.new(name, '', attributes)
       element_stack << new_element
     end
 
