@@ -2,8 +2,8 @@
  
 Gem::Specification.new do |s|
   s.name = 'saxaphone'
-  s.version = '0.1.0'
-  s.summary = 'Sexy SAX Parsing'
+  s.version = '0.2.1'
+  s.summary = 'Object Oriented SAX Parsing'
   s.description = 'Use objects'
 
   s.required_ruby_version     = '>= 1.9.2'

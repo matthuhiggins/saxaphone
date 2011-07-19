@@ -28,10 +28,6 @@ module Saxaphone
         element_handlers[element_name] = ElementHandler.new(class_name, block)
       end
 
-      def has_attributes(attribute_names)
-        raise 'not implemented'
-      end
-
       def element_handlers
         @element_handlers ||= {}
       end
@@ -42,10 +38,10 @@ module Saxaphone
     end
 
     attr_accessor :name, :content, :attributes
-    def initialize(name = '', content = '')
+    def initialize(name = '', content = '', attribute_array = [])
       self.name = name
       self.content = content
-      self.attributes = {}
+      self.attributes = Hash[attribute_array]
       setup
     end
 

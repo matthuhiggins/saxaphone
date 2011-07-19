@@ -16,6 +16,13 @@ class Saxaphone::ElementTest < MiniTest::Spec
     assert_equal 'hola', element.setup_attr
   end
 
+  def test_initialize
+    element = Saxaphone::Element.new('foo', 'bar', [['a', 'b']])
+    assert_equal 'foo', element.name
+    assert_equal 'bar', element.content
+    assert_equal({'a' => 'b'}, element.attributes)
+  end
+
   def test_element_attributes
     element = define_element do
       element_attributes %w(foo bar)
