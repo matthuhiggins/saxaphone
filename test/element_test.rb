@@ -54,7 +54,7 @@ class Saxaphone::ElementTest < MiniTest::Spec
       end
     end
 
-    child_element = element.element_for('omg').new
+    child_element = element.element_for('omg').new('omg')
     
     assert_kind_of TestChildElement, child_element
     child_element.special = 'weee'
@@ -68,7 +68,7 @@ class Saxaphone::ElementTest < MiniTest::Spec
       has_element 'wtf', 'Saxaphone::ElementTest::TestChildElement'
     end
 
-    child_element = element.element_for('wtf').new
+    child_element = element.element_for('wtf').new('wtf')
     
     assert_kind_of TestChildElement, child_element
     element.add_element(child_element)
