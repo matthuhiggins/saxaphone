@@ -76,12 +76,10 @@ module Saxaphone
       # 
       #   element.attributes # => {"dollars" => "4.33"}
       def element_attribute(element_name, options = {})
-        converted_name = options.delete(:as) || element_name
-        logic = proc { |element| attributes[converted_name] = element.content }
-        element_handler = ElementHandler.new(@@base_class_name, logic)
+        converted_name = options.delete(:as)
 
         has_element(element_name) do |element|
-          attributes[converted_name] = element.content
+          attributes[converted_name || element.name] = element.content
         end
       end
 
@@ -149,10 +147,10 @@ module Saxaphone
         @stored_attributes = attribute_names.flatten.to_set
       end
 
-      def element_handlers
-        @element_handlers ||= {}
+      def handler_for(element_name)
+        element_handlers[element_name] || element_handlers['*']
       end
-
+      
       def stored_attributes
         @stored_attributes ||= Set.new
       end
@@ -160,6 +158,11 @@ module Saxaphone
       def parse(xml)
         Saxaphone::Document.parse(xml, self)
       end
+
+      private
+        def element_handlers
+          @element_handlers ||= {}
+        end
     end
 
     attr_accessor :name, :content, :attributes
@@ -174,13 +177,13 @@ module Saxaphone
     end
 
     def add_element(element)
-      if element_handler = self.class.element_handlers[element.name]
+      if element_handler = self.class.handler_for(element.name)
         instance_exec(element, &element_handler.proc) if element_handler.proc
       end
     end
 
     def element_for(element_name)
-      if element_handler = self.class.element_handlers[element_name]
+      if element_handler = self.class.handler_for(element_name)
         Saxaphone::Util.constantize(element_handler.class_name)
       else
         Saxaphone::Element
