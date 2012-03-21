@@ -7,9 +7,19 @@ module Saxaphone
 
         constant = Object
         names.each do |name|
-          constant = constant.const_defined?(name, false) ? constant.const_get(name) : constant.const_missing(name)
+          constant = standardized_const_defined?(constant, name) ? constant.const_get(name) : constant.const_missing(name)
         end
         constant
+      end
+
+      if Module.method(:const_defined?).arity == 1
+        def standardized_const_defined?(constant, name)
+          constant.const_defined?(name)
+        end
+      else
+        def standardized_const_defined?(constant, name)
+          constant.const_defined?(name, false)
+        end
       end
     end
   end
