@@ -26,7 +26,6 @@ module Saxaphone
     def end_element(name)
       ending_element = element_stack.pop
       if element_stack.empty?
-        p "root"
         self.root_element = ending_element
       else
         element_stack.last.add_element(ending_element)
