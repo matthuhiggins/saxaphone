@@ -7,7 +7,18 @@ module Saxaphone
     class ElementHandler < Struct.new(:class_name, :proc)
     end
 
+    @element_handlers = {}
+    @stored_attributes = Set.new
+
     class << self
+      attr_accessor :element_handlers
+      attr_accessor :stored_attributes
+
+      def inherited(base)
+        base.element_handlers = element_handlers.dup
+        base.stored_attributes = stored_attributes.dup
+      end
+
       # A block can be passed to <tt>setup</tt>,
       # which is called after the element is initialized.
       # 
@@ -144,25 +155,16 @@ module Saxaphone
       # Notice that the "price" attribute is not stored.
       # 
       def store_attributes(*attribute_names)
-        @stored_attributes = attribute_names.flatten.to_set
+        self.stored_attributes += attribute_names.flatten.to_set
       end
 
       def handler_for(element_name)
         element_handlers[element_name] || element_handlers['*']
       end
       
-      def stored_attributes
-        @stored_attributes ||= Set.new
-      end
-
       def parse(xml)
         Saxaphone::Document.parse(xml, self)
       end
-
-      private
-        def element_handlers
-          @element_handlers ||= {}
-        end
     end
 
     attr_accessor :name, :content, :attributes

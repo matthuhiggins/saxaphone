@@ -121,7 +121,25 @@ class Saxaphone::ElementTest < MiniTest::Spec
     element.add_element(child_element)
     # silence?
   end
-  
+
+  def test_attributes_inherited
+    parent = Class.new(Saxaphone::Element) do
+      has_element 'foo'
+      store_attributes 'faz'
+    end
+
+    child = Class.new(parent) do
+      has_element 'bar'
+      store_attributes 'baz'
+    end
+
+    assert_equal ['foo'].to_set, parent.element_handlers.keys.to_set
+    assert_equal ['faz'].to_set, parent.stored_attributes
+
+    assert_equal ['foo', 'bar'].to_set, child.element_handlers.keys.to_set
+    assert_equal ['faz', 'baz'].to_set, child.stored_attributes
+  end
+
   private
     def define_element(&block)
       Class.new(Saxaphone::Element, &block).new
