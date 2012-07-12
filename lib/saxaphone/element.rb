@@ -9,14 +9,17 @@ module Saxaphone
 
     @element_handlers = {}
     @stored_attributes = Set.new
+    @attribute_aliases = {}
 
     class << self
       attr_accessor :element_handlers
       attr_accessor :stored_attributes
+      attr_accessor :attribute_aliases
 
       def inherited(base)
-        base.element_handlers = element_handlers.dup
-        base.stored_attributes = stored_attributes.dup
+        base.element_handlers   = element_handlers.dup
+        base.stored_attributes  = stored_attributes.dup
+        base.attribute_aliases  = attribute_aliases.dup
       end
 
       # A block can be passed to <tt>setup</tt>,
@@ -87,10 +90,12 @@ module Saxaphone
       # 
       #   element.attributes # => {"dollars" => "4.33"}
       def element_attribute(element_name, options = {})
-        converted_name = options.delete(:as)
+        if as = options.delete(:as)
+          attribute_aliases[element_name] = as
+        end
 
         has_element(element_name) do |element|
-          attributes[converted_name || element.name] = element.content
+          assign_attribute_value(element.name, element.content)
         end
       end
 
@@ -158,6 +163,29 @@ module Saxaphone
         self.stored_attributes += attribute_names.flatten.to_set
       end
 
+      # Define a white listed attribute that is extracted
+      # from the XML element and stored in the attribute hash:
+      # 
+      #   WidgetElement < Saxaphone::Element
+      #     store_attribute 'href', as: 'uri'
+      #   end
+      # 
+      #   element = WidgetElement.parse %{
+      #     <widget href="http://www.example.com" color="red" price="3.21">
+      #       ...
+      #     </widget>
+      #   }
+      # 
+      #   element.attributes # => {"uri" => "http://www.example.com"}
+      # 
+      def store_attribute(attribute_name, options = {})
+        if as = options.delete(:as)
+          attribute_aliases[attribute_name] = as
+        end
+
+        self.stored_attributes << attribute_name
+      end
+
       def handler_for(element_name)
         element_handlers[element_name] || element_handlers['*']
       end
@@ -171,7 +199,11 @@ module Saxaphone
     def initialize(name = '', content = '', attribute_array = [])
       self.name = name
       self.content = content
-      self.attributes = Hash[attribute_array.select { |(key, value)| self.class.stored_attributes.include?(key) }]
+      self.attributes = {}
+      attribute_array.each do |key, value|
+        assign_attribute_value(key, value) if self.class.stored_attributes.include?(key)
+      end
+      # self.attributes = Hash[attribute_array.select { |(key, value)| self.class.stored_attributes.include?(key) }]
       setup
     end
 
@@ -191,6 +223,10 @@ module Saxaphone
         Saxaphone::Element
       end
       
+    end
+
+    def assign_attribute_value(key, value)
+      attributes[self.class.attribute_aliases[key] || key] = value
     end
 
     def append_content(string)

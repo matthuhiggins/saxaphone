@@ -16,7 +16,27 @@ class Saxaphone::ElementTest < MiniTest::Spec
     assert_equal 'hola', element.setup_attr
   end
 
-  def test_initialize_with_attributes
+  def test_accessors_inheritence
+    parent = Class.new(Saxaphone::Element) do
+      has_element 'foo'
+      store_attributes 'faz'
+    end
+
+    child = Class.new(parent) do
+      has_element 'bar'
+      store_attribute 'baz', as: 'moo'
+    end
+
+    assert_equal ['foo'].to_set, parent.element_handlers.keys.to_set
+    assert_equal ['faz'].to_set, parent.stored_attributes
+    assert_equal({}, parent.attribute_aliases)
+
+    assert_equal ['foo', 'bar'].to_set, child.element_handlers.keys.to_set
+    assert_equal ['faz', 'baz'].to_set, child.stored_attributes
+    assert_equal({'baz' => 'moo'}, child.attribute_aliases)
+  end
+
+  def test_store_attributes
     element = Class.new(Saxaphone::Element) do
       store_attributes 'a', 'm'
     end.new('foo', 'bar', [['a', 'b'], ['m', 'n'], ['x', 'y']])
@@ -24,6 +44,14 @@ class Saxaphone::ElementTest < MiniTest::Spec
     assert_equal 'foo', element.name
     assert_equal 'bar', element.content
     assert_equal({'a' => 'b', 'm' => 'n'}, element.attributes)
+  end
+
+  def test_store_attribute
+    element = Class.new(Saxaphone::Element) do
+      store_attribute 'm', as: 'n'
+    end.new('foo', 'bar', [['a', 'b'], ['m', 'o']])
+
+    assert_equal({'n' => 'o'}, element.attributes)
   end
 
   def test_element_attributes
@@ -120,24 +148,6 @@ class Saxaphone::ElementTest < MiniTest::Spec
     assert_kind_of TestChildElement, child_element
     element.add_element(child_element)
     # silence?
-  end
-
-  def test_attributes_inherited
-    parent = Class.new(Saxaphone::Element) do
-      has_element 'foo'
-      store_attributes 'faz'
-    end
-
-    child = Class.new(parent) do
-      has_element 'bar'
-      store_attributes 'baz'
-    end
-
-    assert_equal ['foo'].to_set, parent.element_handlers.keys.to_set
-    assert_equal ['faz'].to_set, parent.stored_attributes
-
-    assert_equal ['foo', 'bar'].to_set, child.element_handlers.keys.to_set
-    assert_equal ['faz', 'baz'].to_set, child.stored_attributes
   end
 
   private
