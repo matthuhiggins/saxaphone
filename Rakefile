@@ -1,10 +1,9 @@
 require 'rake'
-require 'rake/testtask'
-require 'rake/rdoctask'
 
 desc 'Default: run unit tests.'
 task :default => :test
 
+require 'rake/testtask'
 desc 'Test.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
@@ -13,6 +12,7 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = true
 end
 
+require 'rdoc/task'
 desc 'Generate documentation.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
