@@ -35,5 +35,10 @@ module Saxaphone
     def characters(string)
       element_stack.last.append_content(string)
     end
+
+    def cdata_block(string)
+      element_stack.last.append_content(string)
+    end
+
   end
 end
