@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
- 
+
 Gem::Specification.new do |s|
   s.name = 'saxaphone'
-  s.version = '0.6.0'
+  s.version = '0.7.0'
   s.summary = 'Object Oriented SAX Parsing'
   s.description = 'Use objects'
 
